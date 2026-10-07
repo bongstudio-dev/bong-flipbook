@@ -549,7 +549,7 @@
 
   /* ---------- arranque ---------- */
 
-  fetch('manifest.json').then(r => r.json()).then(m => {
+  fetch('manifest.json', { cache: 'no-cache' }).then(r => r.json()).then(m => {
     man = m;
     if (m.fondo) raiz.style.setProperty('--fb-bg', m.fondo);
     cabeza.querySelector('h1').textContent = m.titulo;
@@ -567,7 +567,7 @@
     cur = 1;
     medir();
     if (h) irA(Math.min(n, Math.max(1, +h[1])));
-    fetch('../catalogo.json').then(r => r.json()).then(armarCatalogo).catch(() => {});
+    fetch('../catalogo.json', { cache: 'no-cache' }).then(r => r.json()).then(armarCatalogo).catch(() => {});
     const tapa = new Image();
     tapa.onload = tapa.onerror = () => raiz.classList.add('is-ready');
     tapa.src = src(1);
