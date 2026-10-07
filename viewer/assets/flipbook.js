@@ -51,7 +51,8 @@
   const pSolapa = crearPagina('fb-flap side-l');
   pSolapa.appendChild(el('div', 'fb-sh'));
   solapaWrap.appendChild(pSolapa);
-  escena.append(sombraLibro, pIzq, pDer, sombraBajo, pFrente, solapaWrap);
+  const anillos = el('div', 'fb-rings');
+  escena.append(sombraLibro, pIzq, pDer, sombraBajo, pFrente, solapaWrap, anillos);
   libro.appendChild(escena);
   visor.appendChild(libro);
 
@@ -63,6 +64,8 @@
     <span class="fb-sep"></span>
     <button class="fb-btn" data-acc="full" aria-label="Pantalla completa">${ico('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>')}</button>
     <a class="fb-btn" data-acc="pdf" aria-label="Descargar PDF" download>${ico('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}</a>
+    <span class="fb-sep"></span>
+    <a class="fb-btn fb-bong" href="https://bongstudio.ar" target="_blank" rel="noopener" aria-label="Bong Studio" title="Bong Studio"><svg viewBox="0 0 82 96" aria-hidden="true" class="fb-logo"><path d="M72.8 6.7c4.1 4.1 6.7 9.9 6.7 16.1s-2.6 12-6.7 16.1c-4.1 4.2-9.8 6.7-16.1 6.7s-11.9-2.5-16-6.7c-4.1-4.1-6.7-9.9-6.7-16.1s2.6-12 6.7-16.1C44.8 2.5 50.5 0 56.8 0s11.9 2.5 16 6.7zM27.3 7c1 2.7 1 5.8 0 8.6-1 2.4-2.7 4.4-5.2 5.5 13 2.3 12.3 24-2.4 24H0V.7h18C22.8.7 25.9 3.4 27.3 7zM0 50.5l.04 45.1h31.3V51.1H16.8v18.8L.7 50.5zM57.8 73.2l11.9-20.5a22.9 22.9 0 1 0 12.3 20.4H57.8z"/></svg></a>
   `);
   const cargando = el('div', 'fb-loading', '<span></span>');
   raiz.append(visor, barra, cargando);
@@ -116,6 +119,8 @@
   const desplaz = c => (!doble ? 0 : c === 1 ? -W / 2 : pg(c) === undefined ? W / 2 : 0);
 
   function sombraDe(izq, der) {
+    raiz.classList.toggle('sin-izq', !izq);
+    raiz.classList.toggle('sin-der', !der);
     sombraLibro.style.left = (izq ? -W : 0) + 'px';
     sombraLibro.style.width = ((izq ? W : 0) + (der ? W : 0)) + 'px';
   }
@@ -239,6 +244,29 @@
     shB.transform = `rotate(${Math.atan2(-ny, -nx)}rad) translateY(-50%)`;
     shB.background = `linear-gradient(90deg, rgba(0,0,0,${0.38 * s}) 0, rgba(0,0,0,0) ${Math.max(8, ancho * 1.2)}px)`;
     solapaWrap.style.filter = `drop-shadow(0 0 ${Math.round(10 * s)}px rgba(0,0,0,${(0.28 * s).toFixed(3)}))`;
+  }
+
+  // Anillado: aros sobre el lomo, con agujeros en cada página. Cada aro es un tubo:
+  // degradé oscuro-claro-oscuro, un brillo fino arriba y su sombra corrida abajo.
+  function anillar() {
+    anillos.textContent = '';
+    if (!man.anillado) return;
+    const n = Math.max(12, Math.round(H / 24)), m = H * 0.035, p = (H - 2 * m) / (n - 1);
+    const g = Math.max(6, p * 0.8), sw = Math.max(2.2, p * 0.3), alto = p * 0.32;
+    const f = v => v.toFixed(1);
+    let aros = '';
+    for (let i = 0; i < n; i++) {
+      const y = m + i * p;
+      const d = (dy, dx = 0) => `M${f(-g + dx)} ${f(y + alto + dy)} Q${f(dx)} ${f(y - alto * 1.6 + dy)} ${f(g + dx)} ${f(y - alto + dy)}`;
+      aros += `<ellipse class="l" cx="${f(-g)}" cy="${f(y + alto)}" rx="${f(sw * 0.6)}" ry="${f(sw * 0.8)}"/>` +
+        `<ellipse class="r" cx="${f(g)}" cy="${f(y - alto)}" rx="${f(sw * 0.6)}" ry="${f(sw * 0.8)}"/>` +
+        `<path class="sombra" d="${d(sw * 0.9, sw * 0.4)}" stroke-width="${f(sw * 1.1)}"/>` +
+        `<path class="tubo" d="${d(0)}" stroke-width="${f(sw)}"/>` +
+        `<path class="brillo" d="${d(-sw * 0.22)}" stroke-width="${f(sw * 0.28)}"/>`;
+    }
+    anillos.innerHTML = `<svg width="${f(4 * g)}" height="${H}" viewBox="${f(-2 * g)} 0 ${f(4 * g)} ${H}" aria-hidden="true">` +
+      `<defs><linearGradient id="fb-aro" x1="0" x2="1" y1="0" y2="0"><stop offset="0" class="o"/><stop offset=".45" class="c"/><stop offset="1" class="o"/></linearGradient></defs>${aros}</svg>`;
+    anillos.style.left = f(-2 * g) + 'px';
   }
 
   function moverA(P) { hoja.P = acotar(P); dibujar(); }
@@ -436,6 +464,7 @@
       p.style.width = W + 'px'; p.style.height = H + 'px';
     }
     pIzq.style.left = -W + 'px';
+    anillar();
     const i = Math.max(1, seq.indexOf(visible));
     cur = doble ? (i % 2 ? i : i + 1) : i;
     mostrarPliego();
@@ -449,6 +478,7 @@
   fetch('manifest.json').then(r => r.json()).then(m => {
     man = m;
     if (m.fondo) raiz.style.setProperty('--fb-bg', m.fondo);
+    if (m.anillado) { raiz.classList.add('is-ringed'); raiz.style.setProperty('--fb-ring', m.anillado); }
     barra.querySelector('[data-acc=pdf]').href = m.pdf;
     const n = m.total;
     seqS = [undefined];

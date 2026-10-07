@@ -21,9 +21,9 @@ Cada PDF de `libros/` se convierte en un libro con su propia dirección:
 1. Poné el PDF en `libros/<cliente>/<nombre-del-libro>.pdf`, en minúsculas y con guiones.
 2. Opcional: al lado, un `.json` con el mismo nombre para el título de la pestaña y el color de fondo:
    ```json
-   { "titulo": "Educar para Transformar · Profertil", "fondo": "#e9e7e2" }
+   { "titulo": "Educar para Transformar · Profertil", "fondo": "#e9e7e2", "anillado": "#1f4fa8" }
    ```
-   Si no está, toma el título de las propiedades del PDF.
+   Si no está, toma el título de las propiedades del PDF. `anillado` dibuja un anillado 3D de ese color sobre el lomo; sin esa línea, el libro va con lomo pegado.
 3. Commit y push.
 
 ## Cómo se arma el libro
@@ -33,6 +33,7 @@ Cada PDF de `libros/` se convierte en un libro con su propia dirección:
 - Se pasa con clic, arrastrando la esquina, deslizando en el celular o con las flechas del teclado.
 - Cada página se publica como imagen en dos tamaños, y el visor carga la que corresponde a la pantalla. El lector no tiene que bajar el PDF entero para empezar a leer. El botón de descarga entrega el PDF original.
 - Si el PDF tiene links, siguen siendo clickeables.
+- El símbolo de Bong en la barra lleva a bongstudio.ar.
 - La dirección recuerda la página: `.../#p=12` abre directo en la 12.
 - Las páginas llevan `noindex`: no aparecen en Google. Pero el repo es público, así que no subir nada confidencial.
 

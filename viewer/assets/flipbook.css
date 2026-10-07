@@ -160,6 +160,10 @@ html, body {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
+.fb-bong .fb-logo { width: 15px; height: 18px; fill: currentColor; stroke: none; }
+.fb-bong { opacity: 0.85; }
+.fb-bong:hover { opacity: 1; }
+
 .fb-sep { width: 1px; height: 20px; margin: 0 4px; background: rgba(255, 255, 255, 0.2); }
 
 /* Carga */
@@ -186,3 +190,16 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .fb-loading span { animation-duration: 2s; }
 }
+
+/* Anillado */
+.fb-rings { position: absolute; top: 0; pointer-events: none; }
+.fb-rings svg { display: block; overflow: visible; }
+.fb-rings ellipse { fill: rgba(0, 0, 0, 0.55); }
+.sin-izq .fb-rings ellipse.l, .sin-der .fb-rings ellipse.r { display: none; }
+.fb-rings path { fill: none; stroke-linecap: round; }
+.fb-rings .tubo { stroke: url(#fb-aro); }
+.fb-rings .brillo { stroke: rgba(255, 255, 255, 0.55); }
+.fb-rings .sombra { stroke: rgba(0, 0, 0, 0.22); }
+.fb-rings .o { stop-color: color-mix(in srgb, var(--fb-ring, #1f4fa8) 55%, #000); }
+.fb-rings .c { stop-color: color-mix(in srgb, var(--fb-ring, #1f4fa8) 70%, #fff); }
+.is-ringed .fb-gutter { width: 3%; opacity: 0.5; }
