@@ -9,6 +9,7 @@ Cada PDF de `libros/` se convierte en un libro con su propia dirección:
 |---|---|
 | `libros/profertil/educar-para-transformar.pdf` | flipbook.bongstudio.ar/profertil/educar-para-transformar/ |
 | `libros/profertil/mesa-de-proyectos-2026.pdf` | flipbook.bongstudio.ar/profertil/mesa-de-proyectos-2026/ |
+| `libros/profertil/creciendo-en-comunidad.pdf` | flipbook.bongstudio.ar/profertil/creciendo-en-comunidad/ |
 
 ## Resubir un PDF
 
@@ -25,6 +26,12 @@ Cada PDF de `libros/` se convierte en un libro con su propia dirección:
    ```
    Si no está, toma el título de las propiedades del PDF. `anillado` dibuja un anillado 3D de ese color sobre el lomo; sin esa línea, el libro va con lomo pegado.
 3. Commit y push.
+
+## Selector de libros
+
+Abajo a la izquierda (en celular, tocando la tarjeta del título) se puede saltar a los otros libros de la misma carpeta de cliente. `orden` en el .json define la posición.
+
+Para anunciar un libro que todavía no está, se sube **solo el .json** (sin PDF): aparece en gris con la marca "Próximamente". Cuando se sube el PDF con el mismo nombre, se activa solo.
 
 ## Cómo se arma el libro
 

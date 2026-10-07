@@ -249,3 +249,75 @@ html, body {
 .fb-rings .o { stop-color: color-mix(in srgb, var(--fb-ring, #1f4fa8) 55%, #000); }
 .fb-rings .c { stop-color: color-mix(in srgb, var(--fb-ring, #1f4fa8) 70%, #fff); }
 .is-ringed .fb-gutter { width: 3%; opacity: 0.5; }
+
+/* Selector de libros */
+.fb-select {
+  position: absolute;
+  left: 16px;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 3;
+  display: none;
+}
+.has-catalog .fb-select { display: block; }
+.fb-select-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  max-width: min(300px, calc(50vw - 160px));
+  padding: 0 14px 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  font: 500 14px/1 "Satoshi", system-ui, sans-serif;
+  color: #1c1c1c;
+  cursor: pointer;
+}
+.fb-select-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fb-select-btn svg, .fb-chev {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fb-select-btn:focus-visible { outline: 2px solid #1c1c1c; outline-offset: 2px; }
+.fb-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  min-width: 280px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+}
+.fb-menu[hidden] { display: none; }
+.fb-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 12px;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #1c1c1c;
+  text-decoration: none;
+}
+a.fb-menu-item:hover { background: #f2f1ee; }
+.fb-menu-item.is-current { font-weight: 500; }
+.fb-menu-item.is-current::after { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--fb-bong); }
+.fb-menu-item.is-soon { color: #b3b3b3; cursor: default; }
+.fb-menu-item .s { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #b3b3b3; white-space: nowrap; }
+.fb-chev { display: none; }
+@media (max-width: 640px) {
+  .has-catalog .fb-select { display: none; }
+  .has-catalog .fb-card { position: relative; padding-right: 40px; cursor: pointer; }
+  .has-catalog .fb-chev { display: block; position: absolute; right: 14px; top: 50%; margin-top: -8px; color: #777; transition: transform 0.2s; }
+  .fb-card.is-open .fb-chev { transform: rotate(180deg); }
+  .fb-head .fb-menu { position: static; min-width: 0; margin-top: 8px; }
+}

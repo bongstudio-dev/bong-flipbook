@@ -3,7 +3,7 @@ Genera el sitio del flipbook a partir de los PDF de `libros/`.
 
 Cada `libros/<cliente>/<nombre>.pdf` se publica en `/<cliente>/<nombre>/`: páginas en WebP (dos tamaños),
 manifest.json con medidas y links, una copia del PDF para descargar y la imagen
-para compartir (og.jpg). Opcional: un .json con el mismo nombre, con {"titulo", "bajada", "fondo", "anillado"}.
+para compartir (og.jpg). Opcional: un .json con el mismo nombre, con {"titulo", "bajada", "orden", "fondo", "anillado"}.
 
 Uso: python build.py            -> genera _site/
      BASE_URL=https://... python build.py   (para las URLs absolutas de og:image)
@@ -124,6 +124,32 @@ def main():
     for pdf in libros:
         ruta, titulo = construir_libro(pdf, plantilla)
         print(f"OK  /{ruta}/  ({titulo})")
+    armar_catalogos()
+
+
+def armar_catalogos():
+    """Un catalogo.json por carpeta de cliente, para el selector de libros.
+
+    Un .json sin su PDF al lado es un libro que todavía no salió: aparece en gris.
+    """
+    for carpeta in sorted({p.parent for p in LIBROS.rglob("*") if p.suffix in (".pdf", ".json")}):
+        nombres = sorted({p.stem for p in carpeta.iterdir() if p.suffix in (".pdf", ".json")})
+        items = []
+        for nombre in nombres:
+            cfg_path = carpeta / f"{nombre}.json"
+            cfg = json.loads(cfg_path.read_text("utf-8")) if cfg_path.exists() else {}
+            items.append({
+                "slug": slugify(nombre),
+                "titulo": cfg.get("titulo") or nombre,
+                "proximamente": not (carpeta / f"{nombre}.pdf").exists(),
+                "orden": cfg.get("orden", 999),
+            })
+        items.sort(key=lambda i: (i["orden"], i["titulo"]))
+        for i in items:
+            del i["orden"]
+        destino = OUT / "/".join(slugify(p) for p in carpeta.relative_to(LIBROS).parts)
+        destino.mkdir(parents=True, exist_ok=True)
+        (destino / "catalogo.json").write_text(json.dumps(items, ensure_ascii=False), "utf-8")
 
 
 if __name__ == "__main__":
