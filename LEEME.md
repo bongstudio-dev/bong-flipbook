@@ -33,7 +33,7 @@ Cada PDF de `libros/` se convierte en un libro con su propia dirección:
 - Se pasa con clic, arrastrando la esquina, deslizando en el celular o con las flechas del teclado.
 - Cada página se publica como imagen en dos tamaños, y el visor carga la que corresponde a la pantalla. El lector no tiene que bajar el PDF entero para empezar a leer. El botón de descarga entrega el PDF original.
 - Si el PDF tiene links, siguen siendo clickeables.
-- El símbolo de Bong en la barra lleva a bongstudio.ar.
+- Arriba a la izquierda va la tarjeta con el título y la bajada; arriba al medio, el símbolo de Bong (verde marca #306E56), que lleva a bongstudio.ar. Tipografía: Satoshi, servida desde el repo.
 - La dirección recuerda la página: `.../#p=12` abre directo en la 12.
 - Las páginas llevan `noindex`: no aparecen en Google. Pero el repo es público, así que no subir nada confidencial.
 

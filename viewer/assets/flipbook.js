@@ -36,8 +36,17 @@
     if (html) e.innerHTML = html;
     return e;
   };
-  const crearPagina = cls => el('div', 'fb-page ' + cls,
-    '<img alt="" draggable="false" decoding="async"><div class="fb-gutter"></div><div class="fb-links"></div>');
+  const crearPagina = cls => {
+    const p = el('div', 'fb-page ' + cls,
+      '<img alt="" draggable="false" decoding="async"><div class="fb-gutter"></div><div class="fb-links"></div>');
+    const img = p.firstChild;
+    img.onerror = () => { // si se corta la conexión, un reintento
+      const s = img.getAttribute('src');
+      if (s && !img.dataset.reintento) { img.dataset.reintento = 1; setTimeout(() => img.setAttribute('src', s + '?r'), 800); }
+    };
+    img.onload = () => delete img.dataset.reintento;
+    return p;
+  };
 
   const visor = el('div', 'fb-viewport');
   const libro = el('div', 'fb-book');
@@ -67,10 +76,9 @@
     <span class="fb-sep"></span>
     <button class="fb-btn" data-acc="full" aria-label="Pantalla completa">${ico('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>')}</button>
     <a class="fb-btn" data-acc="pdf" aria-label="Descargar PDF" download>${ico('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}</a>
-    <span class="fb-sep"></span>
-    <a class="fb-btn fb-bong" href="https://bongstudio.ar" target="_blank" rel="noopener" aria-label="Bong Studio" title="Bong Studio"><svg viewBox="0 0 82 96" aria-hidden="true" class="fb-logo"><path d="M72.8 6.7c4.1 4.1 6.7 9.9 6.7 16.1s-2.6 12-6.7 16.1c-4.1 4.2-9.8 6.7-16.1 6.7s-11.9-2.5-16-6.7c-4.1-4.1-6.7-9.9-6.7-16.1s2.6-12 6.7-16.1C44.8 2.5 50.5 0 56.8 0s11.9 2.5 16 6.7zM27.3 7c1 2.7 1 5.8 0 8.6-1 2.4-2.7 4.4-5.2 5.5 13 2.3 12.3 24-2.4 24H0V.7h18C22.8.7 25.9 3.4 27.3 7zM0 50.5l.04 45.1h31.3V51.1H16.8v18.8L.7 50.5zM57.8 73.2l11.9-20.5a22.9 22.9 0 1 0 12.3 20.4H57.8z"/></svg></a>
   `);
-  const cabeza = el('header', 'fb-head', '<div class="fb-card"><h1></h1><p></p></div>');
+  const cabeza = el('header', 'fb-head', '<div class="fb-card"><h1></h1><p></p></div>' +
+    '<a class="fb-bong" href="https://bongstudio.ar" target="_blank" rel="noopener" aria-label="Bong Studio" title="Bong Studio"><svg viewBox="0 0 82 96" aria-hidden="true" class="fb-logo"><path d="M72.8 6.7c4.1 4.1 6.7 9.9 6.7 16.1s-2.6 12-6.7 16.1c-4.1 4.2-9.8 6.7-16.1 6.7s-11.9-2.5-16-6.7c-4.1-4.1-6.7-9.9-6.7-16.1s2.6-12 6.7-16.1C44.8 2.5 50.5 0 56.8 0s11.9 2.5 16 6.7zM27.3 7c1 2.7 1 5.8 0 8.6-1 2.4-2.7 4.4-5.2 5.5 13 2.3 12.3 24-2.4 24H0V.7h18C22.8.7 25.9 3.4 27.3 7zM0 50.5l.04 45.1h31.3V51.1H16.8v18.8L.7 50.5zM57.8 73.2l11.9-20.5a22.9 22.9 0 1 0 12.3 20.4H57.8z"/></svg></a>');
   const cargando = el('div', 'fb-loading', '<span></span>');
   raiz.append(cabeza, visor, barra, cargando);
   const ind = barra.querySelector('.fb-ind');
@@ -261,8 +269,9 @@
   function anillar() {
     anillos.textContent = anillosSobre.textContent = '';
     if (!man.anillado) return;
-    const n = Math.max(10, Math.round(H / 31)), m = H * 0.035, p = (H - 2 * m) / (n - 1);
-    const g = Math.max(7, p * 0.72), sw = Math.max(2.4, p * 0.26), alto = p * 0.1;
+    // Cantidad fija y medidas relativas a la página: el anillado se ve igual en cualquier pantalla.
+    const n = 30, m = H * 0.035, p = (H - 2 * m) / (n - 1);
+    const g = p * 0.75, sw = p * 0.27, alto = p * 0.1;
     const f = v => v.toFixed(1);
     let aros = '';
     for (let i = 0; i < n; i++) {
@@ -464,18 +473,19 @@
       doble = wDoble >= wSimple * 0.8;
       W = Math.floor(doble ? wDoble : wSimple);
     };
-    // La tarjeta del título flota arriba a la derecha; si choca con el libro, se le hace lugar.
+    // La cabecera (título y logo) flota arriba; si choca con el libro, se le hace lugar.
     calcular(0);
     let reserva = 0;
-    if (!cabeza.hidden) {
-      const tarjeta = cabeza.firstChild.getBoundingClientRect();
-      const lado = (r.width - (doble ? 2 * W : W)) / 2;
-      const arriba = (r.height - W / prop) / 2;
-      if (lado < tarjeta.width + 16 && arriba < tarjeta.bottom - r.top + 8) {
-        reserva = Math.max(0, tarjeta.bottom - r.top + 8 - margen);
-        calcular(reserva);
+    const bw = doble ? 2 * W : W, bh = W / prop;
+    const libroRect = { l: r.left + (r.width - bw) / 2, t: r.top + (r.height - bh) / 2, r: r.left + (r.width + bw) / 2 };
+    for (const nodo of cabeza.children) {
+      if (nodo.hidden) continue;
+      const c = nodo.getBoundingClientRect();
+      if (c.right > libroRect.l && c.left < libroRect.r && c.bottom + 24 > libroRect.t) {
+        reserva = Math.max(reserva, c.bottom - r.top + 24 - margen);
       }
     }
+    if (reserva) calcular(reserva);
     visor.style.paddingTop = reserva + 'px';
     H = Math.round(W / prop);
     seq = doble ? seqD : seqS;
@@ -504,7 +514,7 @@
     if (m.fondo) raiz.style.setProperty('--fb-bg', m.fondo);
     cabeza.querySelector('h1').textContent = m.titulo;
     cabeza.querySelector('p').textContent = m.bajada || '';
-    cabeza.hidden = !m.titulo;
+    cabeza.querySelector('.fb-card').hidden = !m.titulo;
     if (m.anillado) { raiz.classList.add('is-ringed'); raiz.style.setProperty('--fb-ring', m.anillado); }
     barra.querySelector('[data-acc=pdf]').href = m.pdf;
     const n = m.total;
