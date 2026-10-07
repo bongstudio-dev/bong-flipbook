@@ -19,9 +19,9 @@ Cada PDF de `libros/` se convierte en un libro con su propia dirección:
 ## Sumar un libro nuevo
 
 1. Poné el PDF en `libros/<cliente>/<nombre-del-libro>.pdf`, en minúsculas y con guiones.
-2. Opcional: al lado, un `.json` con el mismo nombre para el título de la pestaña y el color de fondo:
+2. Opcional: al lado, un `.json` con el mismo nombre. `titulo` y `bajada` van en la tarjeta de arriba a la derecha y en la pestaña; `fondo` es el color de fondo:
    ```json
-   { "titulo": "Educar para Transformar · Profertil", "fondo": "#e9e7e2", "anillado": "#1f4fa8" }
+   { "titulo": "Educar para Transformar", "bajada": "Cuaderno Profertil x Bong Studio", "fondo": "#e9e7e2", "anillado": "#1f4fa8" }
    ```
    Si no está, toma el título de las propiedades del PDF. `anillado` dibuja un anillado 3D de ese color sobre el lomo; sin esa línea, el libro va con lomo pegado.
 3. Commit y push.

@@ -112,6 +112,37 @@ html, body {
   pointer-events: none;
 }
 
+/* Nombre del libro */
+.fb-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 16px 0;
+  pointer-events: none;
+}
+.fb-card { pointer-events: auto; }
+.fb-head[hidden] { display: none; }
+.fb-card {
+  max-width: 340px;
+  padding: 12px 18px 13px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.fb-card h1 { margin: 0; font-size: 20px; font-weight: 500; line-height: 1.2; color: #1c1c1c; }
+.fb-card p { margin: 6px 0 0; font-size: 14px; color: #777; }
+.fb-card p:empty { display: none; }
+@media (max-width: 640px) {
+  .fb-head { justify-content: stretch; padding: 10px 12px 0; }
+  .fb-card { max-width: none; flex: 1; padding: 9px 14px 10px; }
+  .fb-card h1 { font-size: 16px; }
+  .fb-card p { font-size: 12px; margin-top: 3px; }
+}
+
 /* Barra */
 .fb-bar {
   flex: none;

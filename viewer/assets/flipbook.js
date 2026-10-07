@@ -70,8 +70,9 @@
     <span class="fb-sep"></span>
     <a class="fb-btn fb-bong" href="https://bongstudio.ar" target="_blank" rel="noopener" aria-label="Bong Studio" title="Bong Studio"><svg viewBox="0 0 82 96" aria-hidden="true" class="fb-logo"><path d="M72.8 6.7c4.1 4.1 6.7 9.9 6.7 16.1s-2.6 12-6.7 16.1c-4.1 4.2-9.8 6.7-16.1 6.7s-11.9-2.5-16-6.7c-4.1-4.1-6.7-9.9-6.7-16.1s2.6-12 6.7-16.1C44.8 2.5 50.5 0 56.8 0s11.9 2.5 16 6.7zM27.3 7c1 2.7 1 5.8 0 8.6-1 2.4-2.7 4.4-5.2 5.5 13 2.3 12.3 24-2.4 24H0V.7h18C22.8.7 25.9 3.4 27.3 7zM0 50.5l.04 45.1h31.3V51.1H16.8v18.8L.7 50.5zM57.8 73.2l11.9-20.5a22.9 22.9 0 1 0 12.3 20.4H57.8z"/></svg></a>
   `);
+  const cabeza = el('header', 'fb-head', '<div class="fb-card"><h1></h1><p></p></div>');
   const cargando = el('div', 'fb-loading', '<span></span>');
-  raiz.append(visor, barra, cargando);
+  raiz.append(cabeza, visor, barra, cargando);
   const ind = barra.querySelector('.fb-ind');
   const btnPrev = barra.querySelector('[data-acc=prev]');
   const btnNext = barra.querySelector('[data-acc=next]');
@@ -260,8 +261,8 @@
   function anillar() {
     anillos.textContent = anillosSobre.textContent = '';
     if (!man.anillado) return;
-    const n = Math.max(12, Math.round(H / 24)), m = H * 0.035, p = (H - 2 * m) / (n - 1);
-    const g = Math.max(6, p * 0.8), sw = Math.max(2.2, p * 0.3), alto = p * 0.1;
+    const n = Math.max(10, Math.round(H / 31)), m = H * 0.035, p = (H - 2 * m) / (n - 1);
+    const g = Math.max(7, p * 0.72), sw = Math.max(2.4, p * 0.26), alto = p * 0.1;
     const f = v => v.toFixed(1);
     let aros = '';
     for (let i = 0; i < n; i++) {
@@ -456,11 +457,26 @@
     const visible = (man && seq.length ? visibles()[0] : 0) || 1;
     const r = visor.getBoundingClientRect();
     const margen = Math.max(16, Math.min(r.width, r.height) * 0.04);
-    const aw = r.width - margen * 2, ah = r.height - margen * 2;
     const prop = man.ancho / man.alto;
-    const wDoble = Math.min(aw / 2, ah * prop), wSimple = Math.min(aw * (man.anillado ? 0.94 : 1), ah * prop);
-    doble = wDoble >= wSimple * 0.8;
-    W = Math.floor(doble ? wDoble : wSimple);
+    const calcular = reserva => {
+      const aw = r.width - margen * 2, ah = r.height - reserva - margen * 2;
+      const wDoble = Math.min(aw / 2, ah * prop), wSimple = Math.min(aw * (man.anillado ? 0.94 : 1), ah * prop);
+      doble = wDoble >= wSimple * 0.8;
+      W = Math.floor(doble ? wDoble : wSimple);
+    };
+    // La tarjeta del título flota arriba a la derecha; si choca con el libro, se le hace lugar.
+    calcular(0);
+    let reserva = 0;
+    if (!cabeza.hidden) {
+      const tarjeta = cabeza.firstChild.getBoundingClientRect();
+      const lado = (r.width - (doble ? 2 * W : W)) / 2;
+      const arriba = (r.height - W / prop) / 2;
+      if (lado < tarjeta.width + 16 && arriba < tarjeta.bottom - r.top + 8) {
+        reserva = Math.max(0, tarjeta.bottom - r.top + 8 - margen);
+        calcular(reserva);
+      }
+    }
+    visor.style.paddingTop = reserva + 'px';
     H = Math.round(W / prop);
     seq = doble ? seqD : seqS;
     tam = H * (devicePixelRatio || 1) > man.tamanos.sm * 1.05 ? 'lg' : 'sm';
@@ -486,6 +502,9 @@
   fetch('manifest.json').then(r => r.json()).then(m => {
     man = m;
     if (m.fondo) raiz.style.setProperty('--fb-bg', m.fondo);
+    cabeza.querySelector('h1').textContent = m.titulo;
+    cabeza.querySelector('p').textContent = m.bajada || '';
+    cabeza.hidden = !m.titulo;
     if (m.anillado) { raiz.classList.add('is-ringed'); raiz.style.setProperty('--fb-ring', m.anillado); }
     barra.querySelector('[data-acc=pdf]').href = m.pdf;
     const n = m.total;
