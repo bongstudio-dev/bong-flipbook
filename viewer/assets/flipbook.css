@@ -192,8 +192,10 @@ html, body {
 }
 
 /* Anillado */
-.fb-rings { position: absolute; top: 0; pointer-events: none; }
-.fb-rings svg { display: block; overflow: visible; }
+.fb-rings { position: absolute; top: 0; left: 0; pointer-events: none; }
+.fb-rings svg { position: absolute; top: 0; display: block; overflow: visible; }
+.fb-rings-top { visibility: hidden; }
+.is-flipping .fb-rings-top { visibility: visible; }
 .fb-rings ellipse { fill: rgba(0, 0, 0, 0.55); }
 .sin-izq .fb-rings ellipse.l, .sin-der .fb-rings ellipse.r { display: none; }
 .fb-rings path { fill: none; stroke-linecap: round; }

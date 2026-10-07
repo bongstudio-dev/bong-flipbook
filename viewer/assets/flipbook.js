@@ -51,8 +51,11 @@
   const pSolapa = crearPagina('fb-flap side-l');
   pSolapa.appendChild(el('div', 'fb-sh'));
   solapaWrap.appendChild(pSolapa);
+  // Dos capas de aros: una debajo de la hoja que se da vuelta y otra encima,
+  // recortada a la hoja, que aparece cuando la hoja se apoya.
   const anillos = el('div', 'fb-rings');
-  escena.append(sombraLibro, pIzq, pDer, sombraBajo, pFrente, solapaWrap, anillos);
+  const anillosSobre = el('div', 'fb-rings fb-rings-top');
+  escena.append(sombraLibro, pIzq, pDer, sombraBajo, pFrente, anillos, solapaWrap, anillosSobre);
   libro.appendChild(escena);
   visor.appendChild(libro);
 
@@ -244,30 +247,34 @@
     shB.left = M[0] + 'px'; shB.top = M[1] + 'px';
     shB.transform = `rotate(${Math.atan2(-ny, -nx)}rad) translateY(-50%)`;
     shB.background = `linear-gradient(90deg, rgba(0,0,0,${0.38 * s}) 0, rgba(0,0,0,0) ${Math.max(8, ancho * 1.2)}px)`;
+    if (man.anillado) {
+      const ref = ([x, y]) => { const t = 2 * ((x - M[0]) * nx + (y - M[1]) * ny); return [x - t * nx, y - t * ny]; };
+      anillosSobre.style.clipPath = poliCss(levantado.map(ref));
+      anillosSobre.style.opacity = Math.min(1, Math.max(0, (progreso - 0.9) / 0.1)).toFixed(3);
+    }
     solapaWrap.style.filter = `drop-shadow(0 0 ${Math.round(10 * s)}px rgba(0,0,0,${(0.28 * s).toFixed(3)}))`;
   }
 
   // Anillado: aros sobre el lomo, con agujeros en cada página. Cada aro es un tubo:
   // degradé oscuro-claro-oscuro, un brillo fino arriba y su sombra corrida abajo.
   function anillar() {
-    anillos.textContent = '';
+    anillos.textContent = anillosSobre.textContent = '';
     if (!man.anillado) return;
     const n = Math.max(12, Math.round(H / 24)), m = H * 0.035, p = (H - 2 * m) / (n - 1);
-    const g = Math.max(6, p * 0.8), sw = Math.max(2.2, p * 0.3), alto = p * 0.32;
+    const g = Math.max(6, p * 0.8), sw = Math.max(2.2, p * 0.3), alto = p * 0.1;
     const f = v => v.toFixed(1);
     let aros = '';
     for (let i = 0; i < n; i++) {
       const y = m + i * p;
-      const d = (dy, dx = 0) => `M${f(-g + dx)} ${f(y + alto + dy)} Q${f(dx)} ${f(y - alto * 1.6 + dy)} ${f(g + dx)} ${f(y - alto + dy)}`;
+      const d = (dy, dx = 0) => `M${f(-g + dx)} ${f(y + alto + dy)} Q${f(dx)} ${f(y - alto * 3.2 + dy)} ${f(g + dx)} ${f(y - alto + dy)}`;
       aros += `<ellipse class="l" cx="${f(-g)}" cy="${f(y + alto)}" rx="${f(sw * 0.6)}" ry="${f(sw * 0.8)}"/>` +
         `<ellipse class="r" cx="${f(g)}" cy="${f(y - alto)}" rx="${f(sw * 0.6)}" ry="${f(sw * 0.8)}"/>` +
         `<path class="sombra" d="${d(sw * 0.9, sw * 0.4)}" stroke-width="${f(sw * 1.1)}"/>` +
         `<path class="tubo" d="${d(0)}" stroke-width="${f(sw)}"/>` +
         `<path class="brillo" d="${d(-sw * 0.22)}" stroke-width="${f(sw * 0.28)}"/>`;
     }
-    anillos.innerHTML = `<svg width="${f(4 * g)}" height="${H}" viewBox="${f(-2 * g)} 0 ${f(4 * g)} ${H}" aria-hidden="true">` +
+    anillos.innerHTML = anillosSobre.innerHTML = `<svg style="left:${f(-2 * g)}px" width="${f(4 * g)}" height="${H}" viewBox="${f(-2 * g)} 0 ${f(4 * g)} ${H}" aria-hidden="true">` +
       `<defs><linearGradient id="fb-aro" x1="0" x2="1" y1="0" y2="0"><stop offset="0" class="o"/><stop offset=".45" class="c"/><stop offset="1" class="o"/></linearGradient></defs>${aros}</svg>`;
-    anillos.style.left = f(-2 * g) + 'px';
   }
 
   function moverA(P) { hoja.P = acotar(P); dibujar(); }
@@ -461,7 +468,7 @@
     libro.style.width = (doble ? 2 * W : W) + 'px';
     libro.style.height = H + 'px';
     escena.style.left = (doble ? W : 0) + 'px';
-    for (const p of [pIzq, pDer, pFrente, pSolapa, sombraBajo]) {
+    for (const p of [pIzq, pDer, pFrente, pSolapa, sombraBajo, anillos, anillosSobre]) {
       p.style.width = W + 'px'; p.style.height = H + 'px';
     }
     pIzq.style.left = -W + 'px';
