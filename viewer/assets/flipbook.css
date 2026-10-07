@@ -1,0 +1,188 @@
+:root {
+  --fb-bg: #e9e7e2;
+  --fb-bar: rgba(28, 28, 28, 0.86);
+  --fb-bar-fg: #f4f2ee;
+  --fb-paper: #f7f5f1;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--fb-bg);
+  overflow: hidden;
+  font: 14px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fb {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--fb-bg);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.fb-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: pinch-zoom;
+  cursor: pointer;
+}
+
+.fb-book {
+  position: relative;
+  flex: none;
+  will-change: transform;
+}
+
+.fb-stage {
+  position: absolute;
+  top: 0;
+}
+
+.fb-bookshadow {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.fb-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  background: #fff;
+  transform-origin: 0 0;
+}
+.fb-page img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+.fb-page.is-none { visibility: hidden; }
+.fb-page.is-blank img { display: none; }
+.fb-page.is-paper { background: var(--fb-paper); }
+
+/* Sombra del lomo */
+.fb-gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 7%;
+  pointer-events: none;
+}
+.side-r .fb-gutter { left: 0; background: linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.04) 45%, rgba(0,0,0,0)); }
+.side-l .fb-gutter { right: 0; background: linear-gradient(270deg, rgba(0,0,0,0.16), rgba(0,0,0,0.04) 45%, rgba(0,0,0,0)); }
+.is-single .fb-gutter { width: 3%; opacity: 0.6; }
+
+.fb-links { position: absolute; inset: 0; }
+.fb-links a { position: absolute; cursor: pointer; }
+.fb-links a:hover { background: rgba(255, 220, 0, 0.18); }
+.is-flipping .fb-links { display: none; }
+
+/* La hoja que se da vuelta */
+.fb-front, .fb-flapwrap { visibility: hidden; }
+.is-flipping .fb-front, .is-flipping .fb-flapwrap { visibility: visible; }
+.fb-flapwrap { position: absolute; inset: 0; pointer-events: none; }
+.fb-undershadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+.fb-sh {
+  position: absolute;
+  width: 4000px;
+  height: 8000px;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+/* Barra */
+.fb-bar {
+  flex: none;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 max(14px, env(safe-area-inset-bottom));
+  padding: 5px;
+  border-radius: 999px;
+  background: var(--fb-bar);
+  color: var(--fb-bar-fg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+.fb-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.fb-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fb-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.fb-btn:focus-visible { outline: 2px solid var(--fb-bar-fg); outline-offset: -2px; }
+.fb-btn:disabled { opacity: 0.3; cursor: default; background: transparent; }
+.fb-btn[hidden] { display: none; }
+.fb-ind {
+  min-width: 78px;
+  padding: 0 6px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.fb-sep { width: 1px; height: 20px; margin: 0 4px; background: rgba(255, 255, 255, 0.2); }
+
+/* Carga */
+.fb-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--fb-bg);
+  color: #555;
+  transition: opacity 0.35s ease;
+}
+.fb-loading span {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-top-color: rgba(0, 0, 0, 0.55);
+  border-radius: 50%;
+  animation: fb-gira 0.8s linear infinite;
+}
+.is-ready .fb-loading { opacity: 0; pointer-events: none; }
+@keyframes fb-gira { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-loading span { animation-duration: 2s; }
+}
