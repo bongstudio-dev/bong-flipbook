@@ -116,7 +116,8 @@
 
   /* ---------- pliegos ---------- */
 
-  const desplaz = c => (!doble ? 0 : c === 1 ? -W / 2 : pg(c) === undefined ? W / 2 : 0);
+  // En simple con anillado, la página se corre para que los aros entren en pantalla.
+  const desplaz = c => (!doble ? (man.anillado ? W * 0.03 : 0) : c === 1 ? -W / 2 : pg(c) === undefined ? W / 2 : 0);
 
   function sombraDe(izq, der) {
     raiz.classList.toggle('sin-izq', !izq);
@@ -450,7 +451,7 @@
     const margen = Math.max(16, Math.min(r.width, r.height) * 0.04);
     const aw = r.width - margen * 2, ah = r.height - margen * 2;
     const prop = man.ancho / man.alto;
-    const wDoble = Math.min(aw / 2, ah * prop), wSimple = Math.min(aw, ah * prop);
+    const wDoble = Math.min(aw / 2, ah * prop), wSimple = Math.min(aw * (man.anillado ? 0.94 : 1), ah * prop);
     doble = wDoble >= wSimple * 0.8;
     W = Math.floor(doble ? wDoble : wSimple);
     H = Math.round(W / prop);
