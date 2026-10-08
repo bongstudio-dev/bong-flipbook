@@ -140,6 +140,45 @@ html, body {
 .fb-card h1 { margin: 0; font-size: 20px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; color: #1c1c1c; }
 .fb-card p { margin: 6px 0 0; font-size: 14px; color: #777; }
 .fb-card p:empty { display: none; }
+.fb-tit { position: relative; }
+
+/* Archivos: originales para imprenta y presentación */
+.fb-res {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #ecebe7;
+}
+.fb-res[hidden] { display: none; }
+.fb-res-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  background: #f2f1ee;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1c1c1c;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.fb-res-item:hover { background: #e8e6e1; }
+.fb-res-item:focus-visible { outline: 2px solid #1c1c1c; outline-offset: 2px; }
+.fb-res-item svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--fb-bong);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fb-res-item .s { font-weight: 400; color: #999; }
 .fb-bong {
   position: absolute;
   top: 22px;
@@ -158,6 +197,8 @@ html, body {
   .fb-card { max-width: none; padding: 9px 14px 10px; }
   .fb-card h1 { font-size: 16px; }
   .fb-card p { font-size: 12px; margin-top: 3px; }
+  .fb-res { margin-top: 9px; padding-top: 9px; }
+  .fb-res-item { height: 30px; padding: 0 11px 0 9px; font-size: 12px; }
 }
 
 /* Barra */
@@ -317,7 +358,8 @@ a.fb-menu-item:hover { background: #f2f1ee; }
 @media (max-width: 640px) {
   .has-catalog .fb-select { display: none; }
   .has-catalog .fb-card { position: relative; padding-right: 40px; cursor: pointer; }
-  .has-catalog .fb-chev { display: block; position: absolute; right: 14px; top: 50%; margin-top: -8px; color: #777; transition: transform 0.2s; }
+  .has-catalog .fb-res { margin-right: -26px; }
+  .has-catalog .fb-chev { display: block; position: absolute; right: -26px; top: 50%; margin-top: -8px; color: #777; transition: transform 0.2s; }
   .fb-card.is-open .fb-chev { transform: rotate(180deg); }
   .fb-head .fb-menu { position: static; min-width: 0; margin-top: 8px; }
 }

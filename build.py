@@ -3,7 +3,7 @@ Genera el sitio del flipbook a partir de los PDF de `libros/`.
 
 Cada `libros/<cliente>/<nombre>.pdf` se publica en `/<cliente>/<nombre>/`: páginas en WebP (dos tamaños),
 manifest.json con medidas y links, una copia del PDF para descargar y la imagen
-para compartir (og.jpg). Opcional: un .json con el mismo nombre, con {"titulo", "bajada", "orden", "fondo", "anillado"}.
+para compartir (og.jpg). Opcional: un .json con el mismo nombre, con {"titulo", "bajada", "orden", "fondo", "anillado", "originales", "figma"}.
 
 Uso: python build.py            -> genera _site/
      BASE_URL=https://... python build.py   (para las URLs absolutas de og:image)
@@ -94,6 +94,8 @@ def construir_libro(pdf_path, plantilla):
         "pdf": pdf_nombre,
         "fondo": config.get("fondo"),
         "anillado": config.get("anillado"),
+        "originales": config.get("originales"),
+        "figma": config.get("figma"),
         "paginas": paginas,
     }
     (destino / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False), "utf-8")
