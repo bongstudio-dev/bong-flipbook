@@ -1,0 +1,91 @@
+#!/bin/bash
+# chequeo-interno · Bong Studio
+# Frena el commit (o la publicación) si un texto que ve el cliente tiene notas internas:
+# nombres del equipo, pedidos, historia de decisiones o referencias.
+#
+# Uso:
+#   como hook de git:   .githooks/pre-commit          (revisa solo las líneas nuevas del commit)
+#   sobre una carpeta:  chequeo-interno.sh --carpeta public   (revisa todo, antes de publicar)
+#
+# Activarlo en un clon nuevo:  git config core.hooksPath .githooks
+#
+# Excepciones:
+#   - La firma del estudio (créditos con cargo) pasa sola.
+#   - Una línea que lleve "chequeo-interno:ok" pasa.
+#   - Rutas enteras: una por línea en .githooks/permitidos (acepta comodines de bash).
+
+set -u
+RAIZ="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+PERMITIDOS="$RAIZ/.githooks/permitidos"
+
+# Lo que no puede aparecer (regex de Perl).
+# Nombres: con mayúscula y sin otro apellido detrás (así pasan "Marcos Sabelli" o "Marcos Juárez").
+NOMBRES='\bMarcos\b(?!\s+(?!Cousseau)\p{Lu})|\bMaru\b|\bMar[ií]a\b(?!\s+(?!L[oó]pez)\p{Lu})|\bClaude\b(?!\.ai)'
+# Pedidos e historia de decisiones, sin distinguir mayúsculas.
+FRASES='(?i:\bpidi[oó]\b|\bpidieron\b|\ba pedido\b|\bpor pedido\b|\bantes (?:era|eran|estaba|iba)\b|\(antes [\d,.]+|\bla referencia\b)'
+PATRONES="$NOMBRES|$FRASES"
+
+permitida_ruta() {
+  local f="$1" p
+  case "$f" in .githooks/*|*/.githooks/*) return 0 ;; esac
+  [ -f "$PERMITIDOS" ] || return 1
+  while IFS= read -r p; do
+    [ -z "$p" ] && continue
+    case "$p" in \#*) continue ;; esac
+    # shellcheck disable=SC2254
+    case "$f" in $p) return 0 ;; esac
+  done < "$PERMITIDOS"
+  return 1
+}
+
+# Lee "ruta<TAB>línea<TAB>texto" por stdin y deja solo lo que choca.
+filtrar() {
+  perl -CSD -Mutf8 -ne '
+    chomp; my ($f, $n, $t) = split /\t/, $_, 3; next unless defined $t;
+    next if $t =~ /chequeo-interno:ok/;
+    next if $t =~ m{/\s*(Creative Director|Brand Designer)\b}i;   # créditos de la firma
+    (my $s = $t) =~ s{data:[^"\x27)\s]+}{}g;                        # imágenes en base64
+    while ($s =~ /('"$PATRONES"')/g) {
+      my $m = $1;
+      # "Claude" nombrado como producto, junto a otros asistentes (informes de tráfico): pasa.
+      next if $m eq "Claude" && $s =~ /ChatGPT|Gemini|Perplexity|Copilot|Anthropic/;
+      my $c = $s; $c =~ s/^\s+//; $c = substr($c, 0, 160);
+      print "  $f:$n  [$m]  $c\n"; last;
+    }'
+}
+
+hallazgos=""
+if [ "${1:-}" = "--carpeta" ]; then
+  DIR="${2:?falta la carpeta}"
+  while IFS= read -r -d '' f; do
+    rel="${f#./}"
+    permitida_ruta "$rel" && continue
+    salida="$(perl -ne 'print "$ARGV\t$.\t$_"' "$f" | filtrar)"
+    [ -n "$salida" ] && hallazgos+="$salida"$'\n'
+  done < <(find "$DIR" -type f \( -name '*.html' -o -name '*.htm' -o -name '*.js' -o -name '*.css' -o -name '*.json' -o -name '*.md' -o -name '*.txt' -o -name '*.svg' \) -not -path '*/node_modules/*' -print0)
+else
+  # Líneas agregadas en el commit, con su número de línea en el archivo nuevo.
+  salida="$(git diff --cached -U0 --no-color --diff-filter=AM | perl -ne '
+    if (/^\+\+\+ b\/(.*)$/) { $f = $1; next }
+    if (/^@@ -\S+ \+(\d+)/) { $n = $1; next }
+    if (/^\+(.*)$/ && defined $f) { print "$f\t$n\t$1\n"; $n++ }
+  ' | while IFS= read -r l; do
+        f="${l%%$'\t'*}"
+        permitida_ruta "$f" || printf '%s\n' "$l"
+      done | filtrar)"
+  hallazgos="$salida"
+fi
+
+if [ -n "$(printf '%s' "$hallazgos" | tr -d '[:space:]')" ]; then
+  echo ""
+  echo "✋ chequeo-interno: hay notas internas en texto que ve el cliente."
+  echo ""
+  printf '%s\n' "$hallazgos" | sed '/^$/d'
+  echo ""
+  echo "Reescribí la línea en términos del sistema (qué hace y por qué conviene),"
+  echo "sin nombres del equipo, pedidos ni historia de decisiones."
+  echo "Si es un falso positivo: sumá 'chequeo-interno:ok' en esa línea o la ruta en .githooks/permitidos."
+  echo ""
+  exit 1
+fi
+exit 0
